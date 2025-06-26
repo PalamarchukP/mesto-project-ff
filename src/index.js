@@ -1,4 +1,5 @@
 import './pages/index.css';
+<<<<<<< HEAD
 import { initialCards } from './components/cards';
 
 const cardsList = document.querySelector('.places__list');
