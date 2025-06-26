@@ -21,3 +21,14 @@
   right: 0;
   z-index: 10;
 }
+
+.popup_content{
+  position: relative;
+  background-color: #fff;
+  min-height: 330px;
+  max-width: 430px;
+  width: 100%;
+  padding: 34px 36px;
+  border-radius: 10px;
+  box-sizing: border-box;
+}

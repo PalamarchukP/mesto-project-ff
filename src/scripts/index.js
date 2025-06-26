@@ -1,3 +1,4 @@
+
 function createCard(cardInfo, deleteCard){
     const cardTemplate = document.querySelector('#card-template').content;
     const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
@@ -23,3 +24,13 @@ initialCards.forEach((item) => {
     const createdCard = createCard(item, deleteCard);
     cardsList.append(createdCard);
 })
+
+
+let allCards = []
+
+function createNew(name, url){
+    const obj={
+        name: name;
+        link: url;
+    };
+}
