@@ -1,65 +1,76 @@
 import './pages/index.css';
-<<<<<<< HEAD
 import { initialCards } from './components/cards';
+import { createCard, deleteCard, clickOnImage, likeHandler } from "./components/card";
+import { openPopup, closePopup, animatePopup } from './components/modal';
 
 const cardsList = document.querySelector('.places__list');
 
-function createCard(cardInfo, deleteCard){
-    const cardTemplate = document.querySelector('#card-template').content;
-    const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
-    
-    cardElement.querySelector('.card__title').textContent = cardInfo.name;
-    cardElement.querySelector('.card__image').src = cardInfo.link;
-    cardElement.querySelector('.card__image').alt = cardInfo.name;
-
-    // находим кнопку удаления
-    const deleteButton = cardElement.querySelector('.card__delete-button');
-    deleteButton.addEventListener('click', () => deleteCard(cardElement));
-
-    return cardElement;
-}
-
-function deleteCard(cardElement){
-    cardElement.remove();
-}
-
-
 initialCards.forEach((item) => {
-    const createdCard = createCard(item, deleteCard);
+    const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler);
     cardsList.append(createdCard);
 })
 
-// import {initialCards} from './components/cards.js';
-//
-//import {initialCards, createdCard, renderCard, deleteCard} from './components/cards.js';
-//
-//import {openPopup, closePopup, closeByClick, closeByEsc} from './components/modal.js'
-//
+const profileEditBtn = document.querySelector('.profile__edit-button');
+const profileAddBtn = document.querySelector('.profile__add-button');
 
+const popupEdit = document.querySelector('.popup_type_edit');
+const popupAdd = document.querySelector('.popup_type_new-card');
 
+animatePopup()
 
-// // теперь картинки можно импортировать,
-// // вебпак добавит в переменные правильные пути
-// import jordanImage from './images/jordan.jpg';
-// import jamesImage from './images/james.jpg';
-// import bryantImage from './images/bryant.jpg';
+//открытие окна редактировния
+profileEditBtn.addEventListener('click',  ()=>{openPopup(popupEdit)});
 
-// const whoIsTheGoat = [
-//   // меняем исходные пути на переменные
-//   { name: 'Michael Jordan', link: jordanImage },
-//   { name: 'Lebron James', link: jamesImage },
-//   { name: 'Kobe Bryant', link: bryantImage },
-// ];
-// Теперь, если попробовать собрать проект командой npm run build, в папке dist появятся используемые изображения:
+//открытие окна добавления
+profileAddBtn.addEventListener('click', ()=>{openPopup(popupAdd)});
 
+//Редактирование имени и информации о себе
+const formElement = popupEdit.querySelector('.popup__form');
 
+const nameInput = formElement.querySelector('.popup__input_type_name');
+const jobInput = formElement.querySelector('.popup__input_type_description');
 
-//Альтернативный способ указать путь к изображению — заполнить атрибут src в теге img. 
-// Допустим, в шапке сайта может быть логотип. 
-// Логотип вставлен с помощью тега img и обращается в атрибуте src к пути ./images/logo.png. 
-// Если вы запустите проект на локальном сервере, изображение не загрузится. 
-// Дело в том, что «Вебпак» уже работает с хешированными версиями файлов — найти logo.png не получится. 
+function handleFormSubmit(evt) {
+    evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
+    
+    const nameValue = nameInput.value;
+    const jobValue = jobInput.value;
 
-//потребуется изменить привычный путь до изображения на такой:
-//<img src="<%=require('./images/logo.png')%>" alt="Логотип"> 
+    const titleName = document.querySelector('.profile__title');
+    const jobDescription = document.querySelector('.profile__description');
 
+    titleName.innerHTML = nameValue;
+    jobDescription.innerHTML  = jobValue;
+
+    closePopup();
+
+    nameInput.value = '';
+    jobInput.value  = '';
+}
+
+// Прикрепляем обработчик к форме:
+formElement.addEventListener('submit', handleFormSubmit);
+
+//добавление новых карточек
+const formElementAdd = popupAdd.querySelector('.popup__form');
+
+const placeNameInput = formElementAdd.querySelector('.popup__input_type_card-name');
+const placeUrlInput = formElementAdd.querySelector('.popup__input_type_url');
+
+function handleFormAddCard(evt){
+    evt.preventDefault();
+
+    const placeName = placeNameInput.value;
+    const placeUrl = placeUrlInput.value;
+    
+    const item = { name: placeName, link: placeUrl }
+    const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler)
+    cardsList.insertBefore(createdCard, cardsList.firstChild);
+    closePopup();
+
+    placeNameInput.value = '';
+    placeUrlInput.value  = '';
+
+}
+
+formElementAdd.addEventListener('submit', handleFormAddCard);
