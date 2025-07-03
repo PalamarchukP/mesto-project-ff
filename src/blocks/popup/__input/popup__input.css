@@ -14,6 +14,33 @@
   margin-bottom: 0;
 }
 
+/* ошибку нужно позиционировать абсолютно, для этого кладем инпут и ошибку в новый див,
+ сколько полей для вводы столько и дивов. делаем этому диву position:relative
+ 
+ при этом увеличивать расстояние между инпутами, 
+ чтобы ошибка в две строки не налазила на инпут*/
+
+.popup__input_type_error{
+  border-bottom: 1px solid #FF0000;
+}
+
+.errors{
+  display: block;
+  color: #FF0000;
+  opacity: 0;
+  font-size: 12px;
+  line-height: 15px;
+  margin-top: 5px;
+  margin-bottom: 0;
+  max-height: 0px;
+  overflow: hidden;
+}
+
+.popup__error_visible{
+  opacity: 1;
+  max-height: 30px;
+}
+
 @media screen and (max-width: 568px) {
   .popup__title {
     font-size: 12px;

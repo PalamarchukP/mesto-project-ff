@@ -2,6 +2,7 @@ import './pages/index.css';
 import { initialCards } from './components/cards';
 import { createCard, deleteCard, likeHandler } from "./components/card";
 import { openPopup, closePopup, animatePopup } from './components/modal';
+import {enableValidation, clearValidation} from './validation';
 
 const cardsList = document.querySelector('.places__list');
 
@@ -31,7 +32,17 @@ const popupTypeImage = document.querySelector('.popup_type_image');
 const popupImage = popupTypeImage.querySelector('.popup__image');
 const popupCaption = popupTypeImage.querySelector('.popup__caption');
 
-animatePopup()
+const validationConfig = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+};
+
+enableValidation(validationConfig);
+animatePopup();
 
 //открытие окна редактировния
 profileEditBtn.addEventListener('click',  ()=>{
@@ -52,8 +63,9 @@ function handleFormEditProfile(evt) {
 
     titleName.textContent = nameValue;
     jobDescription.textContent  = jobValue;
-
+    
     closePopup();
+    clearValidation(validationConfig)/////////////////гдк вызывать эти ыункции
 }
 
 // Прикрепляем обработчик к форме:
@@ -69,8 +81,10 @@ function handleFormAddCard(evt){
     const item = { name: placeName, link: placeUrl }
     const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler)
     cardsList.insertBefore(createdCard, cardsList.firstChild);
+
     closePopup();
 
+    clearValidation(validationConfig)////////////
     evt.target.reset();
 }
 
@@ -86,3 +100,13 @@ function clickOnImage(cardElement) {
     console.log(src, alt);
     openPopup(popupTypeImage)
 }
+
+// return fetch('https://nomoreparties.co/v1/wff-cohort-41/cards', {
+//   headers: {
+//     authorization: '4137014f-17d6-4069-af09-c5b9f7fc2b66'
+//   }
+// })
+//   .then(res => res.json())
+//   .then((result) => {
+//     console.log(result);
+//   });
