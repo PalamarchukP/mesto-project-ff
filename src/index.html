@@ -20,10 +20,14 @@
       </header>
       <main class="content">
         <section class="profile page__section">
-          <div
-            class="profile__image"
-            style="background-image: url(<%=require('./images/avatar.jpg')%>)"
-          ></div>
+          <div class="profile__image">
+            <div class="profile__image-filter"></div>
+            <img
+              class="profile__image-edit"
+              src="<%=require('./images/edit-avatar.svg')%>"
+              alt="pencil"
+            />
+          </div>
 
           <div class="profile__info">
             <h1 class="profile__title">Жак-Ив Кусто</h1>
@@ -66,7 +70,7 @@
               required
               minlength="2"
               maxlength="200"
-              pattern="[A-Za-zА-Яа-яёЁ\-\s]*"
+              pattern="[A-Za-zА-Яа-яёЁ\-\s\,]*"
               data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
             />
             <span class="edit_job-error errors"></span>
@@ -112,6 +116,28 @@
           </form>
         </div>
       </div>
+      <div class="popup popup_type_avatar">
+        <div class="popup__content">
+          <button type="button" class="popup__close"></button>
+          <h3 class="popup__title">Обновить аватар</h3>
+          <form class="popup__form" name="new-avatar" novalidate>
+            <input
+              id="avatar_url"
+              type="url"
+              name="link"
+              class="popup__input popup__input_type_url"
+              placeholder="Ссылка на картинку"
+              required
+              pattern="https?://.+"
+              data-error-message="Введите адрес картинки"
+            />
+            <span class="avatar_url-error errors"></span>
+            <button type="submit" class="button popup__button">
+              Сохранить
+            </button>
+          </form>
+        </div>
+      </div>
       <div class="popup popup_type_image">
         <div class="popup__content popup__content_content_image">
           <button type="button" class="popup__close"></button>
@@ -126,7 +152,10 @@
         <button type="button" class="card__delete-button"></button>
         <div class="card__description">
           <h2 class="card__title"></h2>
-          <button type="button" class="card__like-button"></button>
+          <div class="card__like-container">
+            <button type="button" class="card__like-button"></button>
+            <span id="like-counter"></span>
+          </div>
         </div>
       </li>
     </template>

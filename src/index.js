@@ -1,32 +1,40 @@
 import './pages/index.css';
-import { initialCards } from './components/cards';
 import { createCard, deleteCard, likeHandler } from "./components/card";
 import { openPopup, closePopup, animatePopup } from './components/modal';
 import {enableValidation, clearValidation} from './validation';
+import {apiMethodsEnum, apiServer} from './api.js';
 
 const cardsList = document.querySelector('.places__list');
+let user;
 
-initialCards.forEach((item) => {
-    const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler);
-    cardsList.append(createdCard);
-})
+//Пользователь
+const nameElement = document.querySelector('.profile__title');
+const aboutElement = document.querySelector('.profile__description');
+const avatarElement = document.querySelector('.profile__image');
 
 const profileEditBtn = document.querySelector('.profile__edit-button');
 const profileAddBtn = document.querySelector('.profile__add-button');
 
 const popupEdit = document.querySelector('.popup_type_edit');
 const popupAdd = document.querySelector('.popup_type_new-card');
+const popupAvatar = document.querySelector('.popup_type_avatar');
 
 const titleName = document.querySelector('.profile__title');
 const jobDescription = document.querySelector('.profile__description');
 
 const formProfile = popupEdit.querySelector('.popup__form');
 const formElementAdd = popupAdd.querySelector('.popup__form');
+const formEditAvatar = popupAvatar.querySelector('.popup__form');
 
 const nameInput = formProfile.querySelector('.popup__input_type_name');
 const jobInput = formProfile.querySelector('.popup__input_type_description');
 const placeNameInput = formElementAdd.querySelector('.popup__input_type_card-name');
 const placeUrlInput = formElementAdd.querySelector('.popup__input_type_url');
+const avatarUrlInput = formEditAvatar.querySelector('.popup__input_type_url');
+
+const editProfileSaveButton = formProfile.querySelector('.popup__button')
+const elementAddSaveButton = formElementAdd.querySelector('.popup__button')
+const editAvatarSaveButton = formEditAvatar.querySelector('.popup__button')
 
 const popupTypeImage = document.querySelector('.popup_type_image');
 const popupImage = popupTypeImage.querySelector('.popup__image');
@@ -45,50 +53,98 @@ enableValidation(validationConfig);
 animatePopup();
 
 //открытие окна редактировния
-profileEditBtn.addEventListener('click',  ()=>{
-    nameInput.value = titleName.textContent
-    jobInput.value = jobDescription.textContent
-    openPopup(popupEdit)
+profileEditBtn.addEventListener('click',  () => {
+    nameInput.value = titleName.textContent;
+    jobInput.value = jobDescription.textContent;
+    openPopup(popupEdit);
+    clearValidation(formProfile);
 });
 
 //открытие окна добавления
-profileAddBtn.addEventListener('click', ()=>{openPopup(popupAdd)});
+profileAddBtn.addEventListener('click', () => {
+    openPopup(popupAdd);
+    formElementAdd.reset();
+    clearValidation(formElementAdd);
+});
+
+avatarElement.addEventListener('click', () => {
+    openPopup(popupAvatar);
+    formEditAvatar.reset();
+    clearValidation(formEditAvatar);
+})
+
 
 //Редактирование имени и информации о себе
-function handleFormEditProfile(evt) {
-    evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
-    
+async function handleFormEditProfile(evt) {
+    evt.preventDefault();
+    isLoading(true, editProfileSaveButton);
+
     const nameValue = nameInput.value;
     const jobValue = jobInput.value;
 
-    titleName.textContent = nameValue;
-    jobDescription.textContent  = jobValue;
-    
+    const body = {
+        name: nameValue,
+        about: jobValue 
+    }
+    const userData = await apiServer(apiMethodsEnum.patch, 'users/me', body);
+
+    titleName.textContent = userData.name;
+    jobDescription.textContent  = userData.about;
+
+    isLoading(false, editProfileSaveButton);
     closePopup();
-    clearValidation(validationConfig)/////////////////гдк вызывать эти ыункции
 }
 
 // Прикрепляем обработчик к форме:
 formProfile.addEventListener('submit', handleFormEditProfile);
 
 //добавление новых карточек
-function handleFormAddCard(evt){
+async function handleFormAddCard(evt){
     evt.preventDefault();
+    isLoading(true, elementAddSaveButton);
 
     const placeName = placeNameInput.value;
     const placeUrl = placeUrlInput.value;
     
-    const item = { name: placeName, link: placeUrl }
-    const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler)
+    const body = { name: placeName, link: placeUrl };
+    const item = await apiServer(apiMethodsEnum.post, 'cards', body);
+    
+    const userId = user._id;
+    const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler, userId);
     cardsList.insertBefore(createdCard, cardsList.firstChild);
 
+    isLoading(true, elementAddSaveButton)
     closePopup();
-
-    clearValidation(validationConfig)////////////
     evt.target.reset();
 }
 
 formElementAdd.addEventListener('submit', handleFormAddCard);
+
+async function handleFormEditAvatar(evt) {
+    evt.preventDefault();
+    isLoading(true, editAvatarSaveButton);
+
+    const avatarUrl = avatarUrlInput.value;
+    
+    const body = { avatar: avatarUrl };
+    const item = await apiServer(apiMethodsEnum.patch, 'users/me/avatar', body);
+
+    avatarElement.style.backgroundImage = `url(${item.avatar})`;
+
+    isLoading(false, editAvatarSaveButton);
+    closePopup();
+    evt.target.reset();
+}
+
+formEditAvatar.addEventListener('submit', handleFormEditAvatar);
+
+function isLoading(loading, buttonElement) {
+    if (loading) {
+        buttonElement.textContent = 'Сохранение...';
+    } else {
+        buttonElement.textContent = 'Сохранить';
+    }
+}
 
 //клик на картинку
 function clickOnImage(cardElement) {
@@ -97,16 +153,24 @@ function clickOnImage(cardElement) {
     popupImage.src = src;
     popupImage.alt = alt;
     popupCaption.textContent = alt;
-    console.log(src, alt);
-    openPopup(popupTypeImage)
+    openPopup(popupTypeImage);
 }
 
-// return fetch('https://nomoreparties.co/v1/wff-cohort-41/cards', {
-//   headers: {
-//     authorization: '4137014f-17d6-4069-af09-c5b9f7fc2b66'
-//   }
-// })
-//   .then(res => res.json())
-//   .then((result) => {
-//     console.log(result);
-//   });
+Promise.all([
+    apiServer(apiMethodsEnum.get, 'users/me'), 
+    apiServer(apiMethodsEnum.get, 'cards')
+])
+    .then(([userData, cards]) => {
+        user = userData
+        cards.forEach(function(item) {
+            const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler, user._id);
+            cardsList.append(createdCard);
+        });
+    
+    nameElement.textContent = user.name;
+    aboutElement.textContent = user.about;
+    avatarElement.style.backgroundImage = `url(${user.avatar})`;
+    })
+    .catch((err) => {
+        console.error(err);
+    })
