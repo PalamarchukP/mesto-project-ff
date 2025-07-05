@@ -1,8 +1,8 @@
 import './pages/index.css';
 import { createCard, deleteCard, likeHandler } from "./components/card";
 import { openPopup, closePopup, animatePopup } from './components/modal';
-import {enableValidation, clearValidation} from './validation';
-import {apiMethodsEnum, apiServer} from './api.js';
+import { enableValidation, clearValidation } from './validation';
+import { apiMethodsEnum, apiServer } from './api.js';
 
 const cardsList = document.querySelector('.places__list');
 let user;
@@ -46,6 +46,7 @@ const validationConfig = {
     submitButtonSelector: '.popup__button',
     inactiveButtonClass: 'popup__button_disabled',
     inputErrorClass: 'popup__input_type_error',
+    inputErrorActive: 'popup__input-error_active',
     errorClass: 'popup__error_visible'
 };
 
@@ -57,20 +58,20 @@ profileEditBtn.addEventListener('click',  () => {
     nameInput.value = titleName.textContent;
     jobInput.value = jobDescription.textContent;
     openPopup(popupEdit);
-    clearValidation(formProfile);
+    clearValidation(formProfile, validationConfig);
 });
 
 //открытие окна добавления
 profileAddBtn.addEventListener('click', () => {
     openPopup(popupAdd);
     formElementAdd.reset();
-    clearValidation(formElementAdd);
+    clearValidation(formElementAdd, validationConfig);
 });
 
 avatarElement.addEventListener('click', () => {
     openPopup(popupAvatar);
     formEditAvatar.reset();
-    clearValidation(formEditAvatar);
+    clearValidation(formEditAvatar, validationConfig);
 })
 
 
@@ -79,20 +80,22 @@ async function handleFormEditProfile(evt) {
     evt.preventDefault();
     isLoading(true, editProfileSaveButton);
 
-    const nameValue = nameInput.value;
-    const jobValue = jobInput.value;
+    try { 
+        const nameValue = nameInput.value;
+        const jobValue = jobInput.value;
 
-    const body = {
-        name: nameValue,
-        about: jobValue 
+        const body = { name: nameValue, about: jobValue }
+        const userData = await apiServer(apiMethodsEnum.patch, 'users/me', body);
+
+        titleName.textContent = userData.name;
+        jobDescription.textContent  = userData.about;
+
+        closePopup();
+    } catch (err) {
+        console.error(err)
+    } finally {
+        isLoading(false, editProfileSaveButton);
     }
-    const userData = await apiServer(apiMethodsEnum.patch, 'users/me', body);
-
-    titleName.textContent = userData.name;
-    jobDescription.textContent  = userData.about;
-
-    isLoading(false, editProfileSaveButton);
-    closePopup();
 }
 
 // Прикрепляем обработчик к форме:
@@ -103,19 +106,23 @@ async function handleFormAddCard(evt){
     evt.preventDefault();
     isLoading(true, elementAddSaveButton);
 
-    const placeName = placeNameInput.value;
-    const placeUrl = placeUrlInput.value;
-    
-    const body = { name: placeName, link: placeUrl };
-    const item = await apiServer(apiMethodsEnum.post, 'cards', body);
-    
-    const userId = user._id;
-    const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler, userId);
-    cardsList.insertBefore(createdCard, cardsList.firstChild);
+    try {
+        const placeName = placeNameInput.value;
+        const placeUrl = placeUrlInput.value;
 
-    isLoading(true, elementAddSaveButton)
-    closePopup();
-    evt.target.reset();
+        const body = { name: placeName, link: placeUrl };
+        const item = await apiServer(apiMethodsEnum.post, 'cards', body);
+
+        const userId = user._id;
+        const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler, userId);
+        cardsList.insertBefore(createdCard, cardsList.firstChild);
+        closePopup();   
+        evt.target.reset();
+    } catch (err) {
+        console.error(err)
+    } finally {
+        isLoading(true, elementAddSaveButton)
+    }
 }
 
 formElementAdd.addEventListener('submit', handleFormAddCard);
@@ -124,16 +131,19 @@ async function handleFormEditAvatar(evt) {
     evt.preventDefault();
     isLoading(true, editAvatarSaveButton);
 
-    const avatarUrl = avatarUrlInput.value;
-    
-    const body = { avatar: avatarUrl };
-    const item = await apiServer(apiMethodsEnum.patch, 'users/me/avatar', body);
-
-    avatarElement.style.backgroundImage = `url(${item.avatar})`;
-
-    isLoading(false, editAvatarSaveButton);
-    closePopup();
-    evt.target.reset();
+    try {
+        const avatarUrl = avatarUrlInput.value;
+        const body = { avatar: avatarUrl };
+        const item = await apiServer(apiMethodsEnum.patch, 'users/me/avatar', body);
+        
+        avatarElement.style.backgroundImage = `url(${item.avatar})`;
+        closePopup();
+        evt.target.reset();
+    } catch (err) {
+        console.error(err)
+    } finally {
+        isLoading(false, editAvatarSaveButton);
+    }
 }
 
 formEditAvatar.addEventListener('submit', handleFormEditAvatar);
