@@ -1,8 +1,8 @@
 import './pages/index.css';
 import { createCard, deleteCard, likeHandler } from "./components/card";
 import { openPopup, closePopup, animatePopup } from './components/modal';
-import { enableValidation, clearValidation } from './validation';
-import { apiMethodsEnum, apiServer } from './api.js';
+import { enableValidation, clearValidation } from './components/validation.js';
+import { apiMethodsEnum, apiServer } from './components/api.js';
 
 const cardsList = document.querySelector('.places__list');
 let user;

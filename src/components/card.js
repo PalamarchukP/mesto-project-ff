@@ -1,4 +1,4 @@
-import { apiMethodsEnum, apiServer } from "../api";
+import { apiMethodsEnum, apiServer } from "./api";
 
 function createCard(cardInfo, deleteCard, clickOnImage, likeHandler, userId) {    
     const cardTemplate = document.querySelector('#card-template').content;
