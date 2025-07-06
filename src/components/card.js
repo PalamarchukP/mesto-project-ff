@@ -32,22 +32,30 @@ function createCard(cardInfo, deleteCard, clickOnImage, likeHandler, userId) {
 }
 
 async function deleteCard(cardInfo, cardElement, userId) {
-  if (cardInfo.owner._id === userId) {
-    await apiServer(apiMethodsEnum.delete, 'cards', null, cardInfo._id);
-    cardElement.remove();
+  try { 
+    if (cardInfo.owner._id === userId) {
+      await apiServer(apiMethodsEnum.delete, 'cards', null, cardInfo._id);
+      cardElement.remove();
+    }
+  } catch (err) {
+    console.error('Произошла ошибка:', err)
   }
 }
 
 async function likeHandler(cardInfo, cardElement, likeBtn) {
-  const cardLikeCounter = cardElement.querySelector('#like-counter');
-  if (likeBtn.classList.contains('card__like-button_is-active')) { 
-    const { likes } = await apiServer(apiMethodsEnum.delete, 'cards/likes', null, cardInfo._id);
-    cardLikeCounter.textContent = likes.length;
-  } else {
-    const { likes } = await apiServer(apiMethodsEnum.put, 'cards/likes', null, cardInfo._id);
-    cardLikeCounter.textContent = likes.length;
+  try {
+    const cardLikeCounter = cardElement.querySelector('#like-counter');
+    if (likeBtn.classList.contains('card__like-button_is-active')) { 
+      const { likes } = await apiServer(apiMethodsEnum.delete, 'cards/likes', null, cardInfo._id);
+      cardLikeCounter.textContent = likes.length;
+    } else {
+      const { likes } = await apiServer(apiMethodsEnum.put, 'cards/likes', null, cardInfo._id);
+      cardLikeCounter.textContent = likes.length;
+    }
+    likeBtn.classList.toggle('card__like-button_is-active');
+  } catch (err) {
+    console.error('Произошла ошибка:', err)
   }
-  likeBtn.classList.toggle('card__like-button_is-active');
 }
 
 export { createCard, deleteCard, likeHandler};

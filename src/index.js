@@ -92,7 +92,7 @@ async function handleFormEditProfile(evt) {
 
         closePopup();
     } catch (err) {
-        console.error(err)
+        console.error('Произошла ошибка:', err)
     } finally {
         isLoading(false, editProfileSaveButton);
     }
@@ -119,9 +119,9 @@ async function handleFormAddCard(evt){
         closePopup();   
         evt.target.reset();
     } catch (err) {
-        console.error(err)
+        console.error('Произошла ошибка:', err)
     } finally {
-        isLoading(true, elementAddSaveButton)
+        isLoading(false, elementAddSaveButton)
     }
 }
 
@@ -140,7 +140,7 @@ async function handleFormEditAvatar(evt) {
         closePopup();
         evt.target.reset();
     } catch (err) {
-        console.error(err)
+        console.error('Произошла ошибка:', err)
     } finally {
         isLoading(false, editAvatarSaveButton);
     }
@@ -169,18 +169,18 @@ function clickOnImage(cardElement) {
 Promise.all([
     apiServer(apiMethodsEnum.get, 'users/me'), 
     apiServer(apiMethodsEnum.get, 'cards')
-])
+    ])
     .then(([userData, cards]) => {
-        user = userData
-        cards.forEach(function(item) {
-            const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler, user._id);
-            cardsList.append(createdCard);
-        });
+    user = userData
+    cards.forEach(function(item) {
+        const createdCard = createCard(item, deleteCard, clickOnImage, likeHandler, user._id);
+        cardsList.append(createdCard);
+    });
     
     nameElement.textContent = user.name;
     aboutElement.textContent = user.about;
     avatarElement.style.backgroundImage = `url(${user.avatar})`;
     })
     .catch((err) => {
-        console.error(err);
+        console.error('Произошла ошибка:', err);
     })

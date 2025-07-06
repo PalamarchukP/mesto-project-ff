@@ -25,5 +25,4 @@ export async function apiServer(method, namespace, body, query = '') {
         
         return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch(err => { throw err })
 }
